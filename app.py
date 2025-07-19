@@ -1,51 +1,59 @@
-import streamlit as st
 import pandas as pd
+import numpy as np
+import streamlit as st
 from sklearn.model_selection import train_test_split
-from sklearn.preprocessing import LabelEncoder
 from sklearn.linear_model import LogisticRegression
+from sklearn.preprocessing import LabelEncoder
 from sklearn.metrics import accuracy_score
 
-# Streamlit App Title
-st.title("Employee Salary Prediction App")
+# App Title
+st.title("🔍 Employee Salary Prediction using Machine Learning")
 
-# File uploader
-uploaded_file = st.file_uploader("Upload your CSV dataset", type=["csv"])
+# Load dataset automatically (no upload)
+df = pd.read_csv("employee_data.csv")
+st.success("✅ Dataset loaded successfully from the repository.")
 
-if uploaded_file is not None:
-    # Load dataset
-    data = pd.read_csv(uploaded_file)
-    st.write("Dataset Preview:")
-    st.dataframe(data.head())
+# Show data preview
+st.write("### Data Preview")
+st.write(df.head())
 
-    # Feature and Target selection
-    all_columns = data.columns.tolist()
+# Drop missing values
+df.dropna(inplace=True)
 
-    X_columns = st.multiselect("Select Features (Independent variables):", all_columns)
-    y_column = st.selectbox("Select Target (Dependent variable):", all_columns)
+# Encode categorical columns
+le = LabelEncoder()
+for col in df.columns:
+    if df[col].dtype == 'object':
+        df[col] = le.fit_transform(df[col])
 
-    if X_columns and y_column:
-        X = data[X_columns]
-    y = data[y_column]
+# Feature selection
+st.write("### Select Features (Independent Variables):")
+features = st.multiselect("Choose features (X):", options=df.columns)
 
-    # Label Encoding for categorical features
-    for col in X.columns:
-        if X[col].dtype == 'object':
-            le = LabelEncoder()
-            X[col] = le.fit_transform(X[col].astype(str))
+# Target selection
+st.write("### Select Target (Dependent Variable):")
+target = st.selectbox("Choose target (y):", options=df.columns)
 
-    if y.dtype == 'object':
-        le_y = LabelEncoder()
-        y = le_y.fit_transform(y.astype(str))
+# Model training after selections
+if features and target:
+    X = df[features]
+    y = df[target]
 
-    # Split data
-    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+    # Split the dataset
+    X_train, X_test, y_train, y_test = train_test_split(
+        X, y, test_size=0.2, random_state=42
+    )
 
-    # Train model
-    model = LogisticRegression(max_iter=1000)
+    # Train the model
+    model = LogisticRegression()
     model.fit(X_train, y_train)
 
-    # Predict
+    # Predict and evaluate
     y_pred = model.predict(X_test)
-    acc = accuracy_score(y_test, y_pred)
+    accuracy = accuracy_score(y_test, y_pred)
 
-    st.success(f"Model trained! Accuracy: {acc:.2f}")
+    # Display results
+    st.success(f"✅ Model Trained Automatically!")
+    st.write(f"*Accuracy:* {accuracy * 100:.2f}%")
+
+
