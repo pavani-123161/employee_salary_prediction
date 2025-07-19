@@ -25,7 +25,6 @@ le = LabelEncoder()
 for col in df.columns:
     if df[col].dtype == 'object':
         df[col] = le.fit_transform(df[col])
-
 # Feature selection
 st.write("### Select Features (Independent Variables):")
 features = st.multiselect("Choose features (X):", options=df.columns)
@@ -54,6 +53,4 @@ if features and target:
 
     # Display results
     st.success(f"✅ Model Trained Automatically!")
-    st.write(f"*Accuracy:* {accuracy * 100:.2f}%")
-
-
+    st.write(f"*Accuracy:* {accuracy*100:.2f}%")
